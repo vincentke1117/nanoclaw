@@ -203,8 +203,32 @@ function buildVolumeMounts(
  * Read allowed secrets from .env for passing to the container via stdin.
  * Secrets are never written to disk or mounted as files.
  */
+export function normalizeProviderSecrets(
+  envSecrets: Record<string, string>,
+): Record<string, string> {
+  const normalized = { ...envSecrets };
+
+  // Allow startup configuration with provider-agnostic vars while keeping
+  // runtime compatibility with Claude Agent SDK's Anthropic env contract.
+  if (normalized.NANOCLAW_LLM_API_KEY) {
+    normalized.ANTHROPIC_API_KEY = normalized.NANOCLAW_LLM_API_KEY;
+  }
+  if (normalized.NANOCLAW_LLM_BASE_URL) {
+    normalized.ANTHROPIC_BASE_URL = normalized.NANOCLAW_LLM_BASE_URL;
+  }
+
+  return normalized;
+}
+
 function readSecrets(): Record<string, string> {
-  return readEnvFile(['CLAUDE_CODE_OAUTH_TOKEN', 'ANTHROPIC_API_KEY']);
+  const envSecrets = readEnvFile([
+    'CLAUDE_CODE_OAUTH_TOKEN',
+    'ANTHROPIC_API_KEY',
+    'ANTHROPIC_BASE_URL',
+    'NANOCLAW_LLM_API_KEY',
+    'NANOCLAW_LLM_BASE_URL',
+  ]);
+  return normalizeProviderSecrets(envSecrets);
 }
 
 function buildContainerArgs(

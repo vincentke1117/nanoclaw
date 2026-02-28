@@ -31,6 +31,27 @@ claude
 
 然后运行 `/setup`。Claude Code 会处理一切：依赖安装、身份验证、容器设置、服务配置。
 
+
+## 第三方 API 端点（Anthropic 兼容）
+
+NanoClaw 仍然运行 Claude Agent SDK，但现在可以在启动时指向 Anthropic 兼容的网关/代理。
+
+你可以设置标准 Anthropic 变量：
+
+```bash
+ANTHROPIC_API_KEY=your_key
+ANTHROPIC_BASE_URL=https://your-gateway.example.com
+```
+
+或者使用 NanoClaw 别名：
+
+```bash
+NANOCLAW_LLM_API_KEY=your_key
+NANOCLAW_LLM_BASE_URL=https://your-gateway.example.com
+```
+
+NanoClaw 会在运行时把 `NANOCLAW_LLM_*` 映射为 `ANTHROPIC_*`。
+
 ## 设计哲学
 
 **小巧易懂：** 单一进程，少量源文件。无微服务、无消息队列、无复杂抽象层。让 Claude Code 引导您轻松上手。
@@ -182,3 +203,5 @@ Docker 提供跨平台支持（macOS 和 Linux）和成熟的生态系统。在 
 ## 许可证
 
 MIT
+
+

@@ -33,6 +33,27 @@ claude
 
 Then run `/setup`. Claude Code handles everything: dependencies, authentication, container setup and service configuration.
 
+
+## Third-Party API Endpoint (Anthropic-Compatible)
+
+NanoClaw still runs the Claude Agent SDK, but you can point it to an Anthropic-compatible gateway/proxy at startup.
+
+Set either standard Anthropic vars:
+
+```bash
+ANTHROPIC_API_KEY=your_key
+ANTHROPIC_BASE_URL=https://your-gateway.example.com
+```
+
+or NanoClaw aliases:
+
+```bash
+NANOCLAW_LLM_API_KEY=your_key
+NANOCLAW_LLM_BASE_URL=https://your-gateway.example.com
+```
+
+NanoClaw maps `NANOCLAW_LLM_*` to `ANTHROPIC_*` at runtime.
+
 ## Philosophy
 
 **Small enough to understand.** One process, a few source files and no microservices. If you want to understand the full NanoClaw codebase, just ask Claude Code to walk you through it.
