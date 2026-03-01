@@ -33,6 +33,34 @@ claude
 
 Then run `/setup`. Claude Code handles everything: dependencies, authentication, container setup and service configuration.
 
+## Third-Party API Endpoint (Anthropic-Compatible)
+
+NanoClaw still runs the Claude Agent SDK, but you can point it to an Anthropic-compatible gateway/proxy at startup.
+
+Set either standard Anthropic vars:
+
+```bash
+ANTHROPIC_API_KEY=your_key
+ANTHROPIC_BASE_URL=https://your-gateway.example.com
+```
+
+or NanoClaw aliases:
+
+```bash
+NANOCLAW_LLM_API_KEY=your_key
+NANOCLAW_LLM_BASE_URL=https://your-gateway.example.com
+```
+
+You can also select a provider preset (inspired by MicroClaw's provider matrix)
+and let NanoClaw fill the base URL automatically when `NANOCLAW_LLM_BASE_URL`
+and `ANTHROPIC_BASE_URL` are not set:
+
+```bash
+NANOCLAW_LLM_PROVIDER=openai    # or openrouter / ollama / google / deepseek / moonshot / mistral / xai / together / custom
+```
+
+NanoClaw maps `NANOCLAW_LLM_*` to `ANTHROPIC_*` at runtime.
+
 ## Philosophy
 
 **Small enough to understand.** One process, a few source files and no microservices. If you want to understand the full NanoClaw codebase, just ask Claude Code to walk you through it.
@@ -44,6 +72,7 @@ Then run `/setup`. Claude Code handles everything: dependencies, authentication,
 **Customization = code changes.** No configuration sprawl. Want different behavior? Modify the code. The codebase is small enough that it's safe to make changes.
 
 **AI-native.**
+
 - No installation wizard; Claude Code guides setup.
 - No monitoring dashboard; ask Claude what's happening.
 - No debugging tools; describe the problem and Claude fixes it.
@@ -74,6 +103,7 @@ Talk to your assistant with the trigger word (default: `@Andy`):
 ```
 
 From the main channel (your self-chat), you can manage groups and tasks:
+
 ```
 @Andy list all scheduled tasks across groups
 @Andy pause the Monday briefing task
@@ -106,9 +136,11 @@ Users then run `/add-telegram` on their fork and get clean code that does exactl
 Skills we'd like to see:
 
 **Communication Channels**
+
 - `/add-slack` - Add Slack
 
 **Session Management**
+
 - `/clear` - Add a `/clear` command that compacts the conversation (summarizes context while preserving critical information in the same session). Requires figuring out how to trigger compaction programmatically via the Claude Agent SDK.
 
 ## Requirements
@@ -127,6 +159,7 @@ WhatsApp (baileys) --> SQLite --> Polling loop --> Container (Claude Agent SDK) 
 Single Node.js process. Agents execute in isolated Linux containers with filesystem isolation. Only mounted directories are accessible. Per-group message queue with concurrency control. IPC via filesystem.
 
 Key files:
+
 - `src/index.ts` - Orchestrator: state, message loop, agent invocation
 - `src/channels/whatsapp.ts` - WhatsApp connection, auth, send/receive
 - `src/ipc.ts` - IPC watcher and task processing

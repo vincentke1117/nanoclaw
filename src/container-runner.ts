@@ -199,12 +199,59 @@ function buildVolumeMounts(
   return mounts;
 }
 
+const PROVIDER_BASE_URL_PRESETS: Record<string, string> = {
+  openai: 'https://api.openai.com/v1',
+  openrouter: 'https://openrouter.ai/api/v1',
+  ollama: 'http://127.0.0.1:11434/v1',
+  google: 'https://generativelanguage.googleapis.com/v1beta/openai',
+  deepseek: 'https://api.deepseek.com/v1',
+  moonshot: 'https://api.moonshot.cn/v1',
+  mistral: 'https://api.mistral.ai/v1',
+  xai: 'https://api.x.ai/v1',
+  together: 'https://api.together.xyz/v1',
+  custom: '',
+};
+
+function getProviderBaseUrl(provider?: string): string | undefined {
+  if (!provider) return undefined;
+  const key = provider.toLowerCase();
+  return PROVIDER_BASE_URL_PRESETS[key] || undefined;
+}
+
 /**
  * Read allowed secrets from .env for passing to the container via stdin.
  * Secrets are never written to disk or mounted as files.
  */
+export function normalizeProviderSecrets(
+  envSecrets: Record<string, string>,
+): Record<string, string> {
+  const normalized = { ...envSecrets };
+
+  // Allow startup configuration with provider-agnostic vars while keeping
+  // runtime compatibility with Claude Agent SDK's Anthropic env contract.
+  if (normalized.NANOCLAW_LLM_API_KEY) {
+    normalized.ANTHROPIC_API_KEY = normalized.NANOCLAW_LLM_API_KEY;
+  }
+  if (normalized.NANOCLAW_LLM_BASE_URL) {
+    normalized.ANTHROPIC_BASE_URL = normalized.NANOCLAW_LLM_BASE_URL;
+  } else if (!normalized.ANTHROPIC_BASE_URL) {
+    const presetBaseUrl = getProviderBaseUrl(normalized.NANOCLAW_LLM_PROVIDER);
+    if (presetBaseUrl) normalized.ANTHROPIC_BASE_URL = presetBaseUrl;
+  }
+
+  return normalized;
+}
+
 function readSecrets(): Record<string, string> {
-  return readEnvFile(['CLAUDE_CODE_OAUTH_TOKEN', 'ANTHROPIC_API_KEY']);
+  const envSecrets = readEnvFile([
+    'CLAUDE_CODE_OAUTH_TOKEN',
+    'ANTHROPIC_API_KEY',
+    'ANTHROPIC_BASE_URL',
+    'NANOCLAW_LLM_API_KEY',
+    'NANOCLAW_LLM_BASE_URL',
+    'NANOCLAW_LLM_PROVIDER',
+  ]);
+  return normalizeProviderSecrets(envSecrets);
 }
 
 function buildContainerArgs(

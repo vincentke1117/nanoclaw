@@ -85,7 +85,11 @@ vi.mock('child_process', async () => {
   };
 });
 
-import { runContainerAgent, ContainerOutput } from './container-runner.js';
+import {
+  runContainerAgent,
+  ContainerOutput,
+  normalizeProviderSecrets,
+} from './container-runner.js';
 import type { RegisteredGroup } from './types.js';
 
 const testGroup: RegisteredGroup = {
@@ -205,5 +209,48 @@ describe('container-runner timeout behavior', () => {
     const result = await resultPromise;
     expect(result.status).toBe('success');
     expect(result.newSessionId).toBe('session-456');
+  });
+});
+
+describe('provider secret normalization', () => {
+  it('maps NANOCLAW provider vars to Anthropic vars', () => {
+    const normalized = normalizeProviderSecrets({
+      NANOCLAW_LLM_API_KEY: 'proxy-key',
+      NANOCLAW_LLM_BASE_URL: 'https://gateway.example.com',
+    });
+
+    expect(normalized.ANTHROPIC_API_KEY).toBe('proxy-key');
+    expect(normalized.ANTHROPIC_BASE_URL).toBe('https://gateway.example.com');
+  });
+
+  it('derives base URL from provider preset when explicit URL is absent', () => {
+    const normalized = normalizeProviderSecrets({
+      NANOCLAW_LLM_API_KEY: 'proxy-key',
+      NANOCLAW_LLM_PROVIDER: 'openrouter',
+    });
+
+    expect(normalized.ANTHROPIC_API_KEY).toBe('proxy-key');
+    expect(normalized.ANTHROPIC_BASE_URL).toBe('https://openrouter.ai/api/v1');
+  });
+
+  it('keeps explicit base URL over provider preset', () => {
+    const normalized = normalizeProviderSecrets({
+      NANOCLAW_LLM_PROVIDER: 'openai',
+      NANOCLAW_LLM_BASE_URL: 'https://override.example.com/v1',
+    });
+
+    expect(normalized.ANTHROPIC_BASE_URL).toBe(
+      'https://override.example.com/v1',
+    );
+  });
+
+  it('keeps explicit Anthropic vars when NANOCLAW vars are absent', () => {
+    const normalized = normalizeProviderSecrets({
+      ANTHROPIC_API_KEY: 'ant-key',
+      ANTHROPIC_BASE_URL: 'https://anthropic.example.com',
+    });
+
+    expect(normalized.ANTHROPIC_API_KEY).toBe('ant-key');
+    expect(normalized.ANTHROPIC_BASE_URL).toBe('https://anthropic.example.com');
   });
 });
