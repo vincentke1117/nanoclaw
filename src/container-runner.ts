@@ -199,6 +199,25 @@ function buildVolumeMounts(
   return mounts;
 }
 
+const PROVIDER_BASE_URL_PRESETS: Record<string, string> = {
+  openai: 'https://api.openai.com/v1',
+  openrouter: 'https://openrouter.ai/api/v1',
+  ollama: 'http://127.0.0.1:11434/v1',
+  google: 'https://generativelanguage.googleapis.com/v1beta/openai',
+  deepseek: 'https://api.deepseek.com/v1',
+  moonshot: 'https://api.moonshot.cn/v1',
+  mistral: 'https://api.mistral.ai/v1',
+  xai: 'https://api.x.ai/v1',
+  together: 'https://api.together.xyz/v1',
+  custom: '',
+};
+
+function getProviderBaseUrl(provider?: string): string | undefined {
+  if (!provider) return undefined;
+  const key = provider.toLowerCase();
+  return PROVIDER_BASE_URL_PRESETS[key] || undefined;
+}
+
 /**
  * Read allowed secrets from .env for passing to the container via stdin.
  * Secrets are never written to disk or mounted as files.
