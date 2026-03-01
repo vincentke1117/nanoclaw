@@ -234,9 +234,6 @@ export function normalizeProviderSecrets(
   }
   if (normalized.NANOCLAW_LLM_BASE_URL) {
     normalized.ANTHROPIC_BASE_URL = normalized.NANOCLAW_LLM_BASE_URL;
-  } else if (!normalized.ANTHROPIC_BASE_URL) {
-    const presetBaseUrl = getProviderBaseUrl(normalized.NANOCLAW_LLM_PROVIDER);
-    if (presetBaseUrl) normalized.ANTHROPIC_BASE_URL = presetBaseUrl;
   }
 
   return normalized;
@@ -249,7 +246,6 @@ function readSecrets(): Record<string, string> {
     'ANTHROPIC_BASE_URL',
     'NANOCLAW_LLM_API_KEY',
     'NANOCLAW_LLM_BASE_URL',
-    'NANOCLAW_LLM_PROVIDER',
   ]);
   return normalizeProviderSecrets(envSecrets);
 }

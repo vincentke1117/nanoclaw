@@ -223,27 +223,6 @@ describe('provider secret normalization', () => {
     expect(normalized.ANTHROPIC_BASE_URL).toBe('https://gateway.example.com');
   });
 
-  it('derives base URL from provider preset when explicit URL is absent', () => {
-    const normalized = normalizeProviderSecrets({
-      NANOCLAW_LLM_API_KEY: 'proxy-key',
-      NANOCLAW_LLM_PROVIDER: 'openrouter',
-    });
-
-    expect(normalized.ANTHROPIC_API_KEY).toBe('proxy-key');
-    expect(normalized.ANTHROPIC_BASE_URL).toBe('https://openrouter.ai/api/v1');
-  });
-
-  it('keeps explicit base URL over provider preset', () => {
-    const normalized = normalizeProviderSecrets({
-      NANOCLAW_LLM_PROVIDER: 'openai',
-      NANOCLAW_LLM_BASE_URL: 'https://override.example.com/v1',
-    });
-
-    expect(normalized.ANTHROPIC_BASE_URL).toBe(
-      'https://override.example.com/v1',
-    );
-  });
-
   it('keeps explicit Anthropic vars when NANOCLAW vars are absent', () => {
     const normalized = normalizeProviderSecrets({
       ANTHROPIC_API_KEY: 'ant-key',
